@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rl_title"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/application_theme_color">
+
+    <TextView
+        android:id="@+id/tv_title_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:ellipsize="marquee"
+        android:gravity="center"
+        android:layout_centerInParent="true"
+        android:singleLine="true"
+        android:text="@string/title_text"
+        android:textColor="@android:color/white"
+        android:textSize="21sp" />
+
+    <TextView
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:id="@+id/tv_backward_button"
+        android:drawableStart="@mipmap/back_arrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:textSize="18sp"
+        android:text="@string/backward_text"
+        android:textColor="@android:color/white"
+        android:gravity="center"
+        android:layout_centerVertical="true" />
+
+    <TextView
+        android:id="@+id/tv_option_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_toEndOf="@id/tv_title_text"
+        android:layout_alignParentEnd="true"
+        android:gravity="center|end"
+        android:textColor="@android:color/white"
+        android:text="@string/option_text"
+        android:textSize="18sp"
+        android:layout_centerVertical="true" />
+
+
+</RelativeLayout>

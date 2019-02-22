@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="preview_resolution" translatable="false">
+        <item>1920x1080</item>
+        <item>1280x720</item>
+    </string-array>
+
+    <string-array name="capture_resolution" translatable="false">
+        <item>2592x1944</item>
+        <item>1920x1080</item>
+        <item>1280x720</item>
+        <item>640x480</item>
+    </string-array>
+
+    <string-array name="recording_resolution" translatable="false">
+        <item>1920x1080</item>
+        <item>1280x720</item>
+    </string-array>
+</resources>

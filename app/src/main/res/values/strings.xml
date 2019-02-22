@@ -1,0 +1,71 @@
+<resources>
+    <string name="app_name">ArixoGlass</string>
+
+    <string name="refresh_text">Refresh</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm_text">Confirm</string>
+
+    <!-- Title Bar -->
+    <string name="title_text" translatable="false">Title</string>
+    <string name="option_text" translatable="false">Option</string>
+
+    <!-- Connection Status -->
+    <string name="uvc_wait_connect">Waiting For Connection</string>
+    <string name="uvc_disconnected">Disconnected</string>
+
+    <!-- Camera -->
+    <string name="picture_token">%d picture token</string>
+    <string name="take_pic_failed">Failed To Take Picture</string>
+    <string name="default_time" translatable="false">00:00:00</string>
+
+    <string name="connected_text">Connected</string>
+    <string name="connecting_text">Connecting……</string>
+    <string name="backward_text">Back</string>
+    <string name="device_not_support_function">Current device does not support this function</string>
+
+    <!-- Gallery -->
+    <string name="gallery_text">Gallery</string>
+    <string name="photo_text">Photo</string>
+    <string name="video_text">Video</string>
+    <string name="select_all_text">Select All</string>
+    <string name="deselect_all_text">Deselect All</string>
+    <string name="delete_text">Delete</string>
+    <string name="select_text">Select</string>
+    <string name="delete_success_text">Deleted Success</string>
+    <string name="unable_view_item_text">Open failed</string>
+
+    <!-- Setting -->
+    <string name="setting_text">Setting</string>
+    <string name="resolution_setting_text">Resolution</string>
+    <string name="burst_shot_setting_text">Burst Shot</string>
+    <string name="burst_shot_count_text">Max Burst Shot Count</string>
+    <string name="osd_setting_text">OSD</string>
+    <string name="bluetooth_setting_text">Bluetooth Setting</string>
+    <string name="clear_cache_text">Clear Cache</string>
+    <string name="confirm_clear_cache_text">Do you want clear all cache?</string>
+    <string name="about_text">About</string>
+    <string name="app_version_text">Version</string>
+    <string name="check_update_text">Check for updates</string>
+    <string name="copyright_text">Copyright ©2019 MATRIXZ ZERO TECHNOLOGY CO.LTD\nAll rights reserved</string>
+    <string name="update_text">Update Glass</string>
+    <string name="lcd_brightness_text">Screen Setting</string>
+    <string name="lcd_brightness_level_low">Low</string>
+    <string name="lcd_brightness_level_medium">Medium</string>
+    <string name="lcd_brightness_level_high">High</string>
+
+    <!-- bluetooth -->
+    <string name="failed_connect_text">Connection failed, device might connected with other phone</string>
+    <string name="success_connect_text">Connection Successful</string>
+    <string name="device_disconnected_text">Disconnected</string>
+    <string name="no_bluetooth_device_connect_text">Bluetooth device not connected</string>
+    <string name="switch_to_device_text">Please switch to Arixo Device</string>
+    <string name="connecting_to_bluetooth_text">Connecting To Bluetooth……</string>
+
+    <!-- content description -->
+    <string name="logo_title" translatable="false">LogoPicture</string>
+    <string name="setting_image_text" translatable="false">Setting Button Image</string>
+    <string name="recording_image_text" translatable="false">Recording Button Image</string>
+    <string name="shutter_image_text" translatable="false">Shutter Button Image</string>
+    <string name="gallery_image_text" translatable="false">Gallery Button Image</string>
+    <string name="gallery_item_image_text" translatable="false">Gallery Item Image</string>
+</resources>

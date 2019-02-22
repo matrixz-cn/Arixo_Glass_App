@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_gray_color"
+    tools:context=".view.activities.SettingActivity">
+
+    <include
+        layout="@layout/title_bar"
+        android:id="@+id/title_bar" />
+
+    <TextView
+        android:id="@+id/tv_resolution_setting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title_bar"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:textSize="22sp"
+        android:text="@string/resolution_setting_text"
+        android:textColor="@android:color/black"
+        android:background="@android:color/white" />
+
+    <Switch
+        android:id="@+id/s_burst_shot_setting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:textSize="22sp"
+        android:layout_below="@id/tv_resolution_setting"
+        android:gravity="center_vertical|start"
+        android:text="@string/burst_shot_setting_text"
+        android:textColor="@android:color/black"
+        android:background="@android:color/white" />
+
+    <LinearLayout
+        android:id="@+id/rl_burst_shot_count_setting_box"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/s_burst_shot_setting"
+        android:background="@android:color/white"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tv_burst_shot_count"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:background="@android:color/white"/>
+
+        <SeekBar
+            android:id="@+id/sb_burst_shot_count_setting"
+            android:max="4"
+            android:background="@android:color/white"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="6"/>
+    </LinearLayout>
+
+    <Switch
+        android:id="@+id/s_osd_setting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:textSize="22sp"
+        android:layout_below="@id/rl_burst_shot_count_setting_box"
+        android:gravity="center_vertical|start"
+        android:text="@string/osd_setting_text"
+        android:textColor="@android:color/black"
+        android:background="@android:color/white"/>
+
+    <Switch
+        android:id="@+id/s_lcd_brightness_setting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:textSize="22sp"
+        android:layout_below="@id/s_osd_setting"
+        android:gravity="center_vertical|start"
+        android:text="@string/lcd_brightness_text"
+        android:textColor="@android:color/black"
+        android:background="@android:color/white" />
+
+    <RadioGroup
+        android:id="@+id/rg_lcd_brightness_setting_box"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/s_lcd_brightness_setting"
+        android:background="@android:color/white"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <RadioButton
+            android:id="@+id/rb_brightness_low"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="true"
+            android:text="@string/lcd_brightness_level_low" />
+
+        <RadioButton
+            android:id="@+id/rb_brightness_medium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="true"
+            android:text="@string/lcd_brightness_level_medium" />
+
+        <RadioButton
+            android:id="@+id/rb_brightness_high"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="true"
+            android:text="@string/lcd_brightness_level_high" />
+
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/tv_bluetooth_setting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:textSize="22sp"
+        android:layout_below="@id/rg_lcd_brightness_setting_box"
+        android:gravity="center_vertical|start"
+        android:text="@string/bluetooth_setting_text"
+        android:textColor="@android:color/black"
+        android:background="@android:color/white" />
+
+    <TextView
+        android:id="@+id/tv_clear_cache"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:textSize="22sp"
+        android:layout_below="@id/tv_bluetooth_setting"
+        android:gravity="center_vertical|start"
+        android:text="@string/clear_cache_text"
+        android:textColor="@android:color/black"
+        android:background="@android:color/white" />
+
+    <TextView
+        android:id="@+id/tv_about"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:textSize="22sp"
+        android:layout_below="@id/tv_clear_cache"
+        android:gravity="center_vertical|start"
+        android:text="@string/about_text"
+        android:textColor="@android:color/black"
+        android:background="@android:color/white" />
+
+</RelativeLayout>

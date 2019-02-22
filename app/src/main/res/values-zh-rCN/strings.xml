@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ArixoGlass</string>
+
+    <string name="refresh_text">刷新</string>
+    <string name="confirm_text">确定</string>
+    <string name="cancel">取消</string>
+
+    <!-- Connection Status -->
+    <string name="uvc_wait_connect">等待连接</string>
+    <string name="uvc_disconnected">断开连接</string>
+
+    <!-- Camera -->
+    <string name="picture_token">已拍取%d张</string>
+    <string name="take_pic_failed">拍照失败</string>
+    <string name="connected_text">已连接</string>
+    <string name="connecting_text">连接中……</string>
+    <string name="backward_text">返回</string>
+    <string name="device_not_support_function">当前设备不支持此功能</string>
+
+    <!-- Gallery -->
+    <string name="gallery_text">图库</string>
+    <string name="photo_text">照片</string>
+    <string name="video_text">视频</string>
+    <string name="select_all_text">全选</string>
+    <string name="deselect_all_text">取消全选</string>
+    <string name="delete_text">删除</string>
+    <string name="select_text">选择</string>
+    <string name="delete_success_text">删除成功</string>
+    <string name="unable_view_item_text">打开失败</string>
+
+    <!-- Setting -->
+    <string name="setting_text">设置</string>
+    <string name="resolution_setting_text">分辨率</string>
+    <string name="burst_shot_setting_text">连拍</string>
+    <string name="burst_shot_count_text">最大连拍张数</string>
+    <string name="osd_setting_text">同屏显示</string>
+    <string name="bluetooth_setting_text">蓝牙设置</string>
+    <string name="clear_cache_text">清除缓存</string>
+    <string name="confirm_clear_cache_text">确定要清除全部缓存吗？</string>
+    <string name="about_text">关于</string>
+    <string name="app_version_text">软件版本</string>
+    <string name="check_update_text">检查更新</string>
+    <string name="copyright_text">Copyright ©2019 北京零矩科技有限公司\nAll rights reserved</string>
+    <string name="update_text">升级眼镜</string>
+    <string name="lcd_brightness_text">显示设置</string>
+    <string name="lcd_brightness_level_low">低</string>
+    <string name="lcd_brightness_level_medium">中</string>
+    <string name="lcd_brightness_level_high">高</string>
+
+    <!-- bluetooth -->
+    <string name="failed_connect_text">连接失败，设备可能已经和其他手机连接</string>
+    <string name="success_connect_text">连接成功</string>
+    <string name="device_disconnected_text">断开连接</string>
+    <string name="no_bluetooth_device_connect_text">未连接蓝牙设备</string>
+    <string name="switch_to_device_text">请切换至Arixo设备</string>
+    <string name="connecting_to_bluetooth_text">正在连接蓝牙……</string>
+
+</resources>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".view.activities.MainActivity">
+
+    <com.arixo.glasssdk.widget.AspectRatioSurfaceView
+        android:id="@+id/camera_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true" />
+
+    <ImageView
+        android:id="@+id/iv_settings_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:contentDescription="@string/setting_image_text"
+        android:src="@mipmap/settings" />
+
+    <RelativeLayout
+        android:id="@+id/rl_function_box"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="10dp">
+
+        <ImageView
+            android:id="@+id/iv_record_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="30dp"
+            android:layout_toStartOf="@+id/iv_shutter_button"
+            android:contentDescription="@string/recording_image_text"
+            android:src="@mipmap/record" />
+
+        <ImageView
+            android:id="@+id/iv_shutter_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="10dp"
+            android:contentDescription="@string/shutter_image_text"
+            android:src="@mipmap/shutter_large" />
+
+        <ImageView
+            android:id="@+id/iv_gallery_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="30dp"
+            android:layout_toEndOf="@id/iv_shutter_button"
+            android:contentDescription="@string/gallery_image_text"
+            android:src="@mipmap/gallery" />
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/tv_recording_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/rl_function_box"
+        android:layout_centerHorizontal="true"
+        android:text="@string/default_time"
+        android:textColor="@android:color/holo_red_light"
+        android:visibility="gone" />
+
+</RelativeLayout>
