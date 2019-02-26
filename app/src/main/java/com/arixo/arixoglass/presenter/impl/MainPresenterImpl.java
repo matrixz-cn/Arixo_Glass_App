@@ -360,7 +360,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
     @Override
     public void unInitCameraService() {
         LCDClient lcdClient = ArixoGlassSDKManager.getInstance().getLCDClient();
-        if (lcdClient != null) {
+        if (lcdClient != null && lcdClient.isScreenSyncing()) {
             lcdClient.stopCaptureRecord();
         }
         ArixoGlassSDKManager.getInstance().destroy();

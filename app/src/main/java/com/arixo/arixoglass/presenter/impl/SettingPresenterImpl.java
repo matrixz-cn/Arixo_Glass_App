@@ -100,9 +100,14 @@ public class SettingPresenterImpl extends BasePresenter<ISettingModel, ISettingV
         if (deviceClient != null) {
             deviceClient.registerDeviceListener(deviceConnectListener);
         }
-        if (lcdClient != null && lcdClient.getLCDLuminance() > 0) {
-            getView().setLCDSwitchStatus(true);
-            getView().showLCDBrightnessSettingBox();
+        if (lcdClient != null) {
+            getView().setOSDSwitchStatus(lcdClient.isScreenSyncing());
+            getView().setLCDSwitchStatus(lcdClient.getLCDLuminance() > 0);
+            if (lcdClient.getLCDLuminance() > 0) {
+                getView().showLCDBrightnessSettingBox();
+            } else {
+                getView().hideLCDBrightnessSettingBox();
+            }
         } else {
             getView().setLCDSwitchStatus(false);
             getView().hideLCDBrightnessSettingBox();
