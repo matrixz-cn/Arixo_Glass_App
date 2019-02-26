@@ -33,4 +33,6 @@ public interface ISettingView extends View {
 
     void hideLCDBrightnessSettingBox();
 
+    void setLCDLevelChecked(int level);
+
 }

@@ -59,10 +59,12 @@ public class SettingPresenterImpl extends BasePresenter<ISettingModel, ISettingV
     private DeviceConnectListener deviceConnectListener = new DeviceConnectListener() {
         @Override
         public void onAttach(UsbDevice device) {
+
         }
 
         @Override
         public void onDeAttach(UsbDevice device) {
+
         }
 
         @Override
@@ -83,6 +85,7 @@ public class SettingPresenterImpl extends BasePresenter<ISettingModel, ISettingV
 
         @Override
         public void onCancel(UsbDevice device) {
+
         }
     };
 
@@ -91,6 +94,7 @@ public class SettingPresenterImpl extends BasePresenter<ISettingModel, ISettingV
 
     @Override
     protected void onViewDestroy() {
+
     }
 
     @Override
@@ -105,6 +109,7 @@ public class SettingPresenterImpl extends BasePresenter<ISettingModel, ISettingV
             getView().setLCDSwitchStatus(lcdClient.getLCDLuminance() > 0);
             if (lcdClient.getLCDLuminance() > 0) {
                 getView().showLCDBrightnessSettingBox();
+                getView().setLCDLevelChecked(SystemParams.getInstance().getInt(Constant.DEFAULT_LCD_BRIGHTNESS_LEVEL, 10) / 5 - 1);
             } else {
                 getView().hideLCDBrightnessSettingBox();
             }
@@ -167,8 +172,7 @@ public class SettingPresenterImpl extends BasePresenter<ISettingModel, ISettingV
         SystemParams.getInstance().setBoolean(Constant.LCD_OPEN, checked);
         if (checked) {
             getView().showLCDBrightnessSettingBox();
-            int lcdBrightnessLevel = SystemParams.getInstance().getInt(Constant.DEFAULT_LCD_BRIGHTNESS_LEVEL, 10);
-            setLCDBrightnessLevel(lcdBrightnessLevel);
+            setLCDBrightnessLevel(SystemParams.getInstance().getInt(Constant.DEFAULT_LCD_BRIGHTNESS_LEVEL, 10));
         } else {
             getView().hideLCDBrightnessSettingBox();
             setLCDBrightnessLevel(0);
