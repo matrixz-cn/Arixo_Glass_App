@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -122,7 +121,6 @@ public class MainActivity extends BaseActivity<IMainModel, IMainView, IMainPrese
     protected void onResume() {
         super.onResume();
         resizeCameraView();
-        Log.d(TAG, "onResume: ");
         if (presenter != null) {
             presenter.openCamera();
             presenter.setOffActivity(false);
@@ -133,7 +131,6 @@ public class MainActivity extends BaseActivity<IMainModel, IMainView, IMainPrese
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG, "onPause: ");
         if (presenter != null) {
             presenter.closeCamera();
             presenter.setOffActivity(true);

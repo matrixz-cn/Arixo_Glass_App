@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +34,7 @@ public class ResolutionItemAdapter extends RecyclerView.Adapter<ResolutionItemAd
 
         TextView resolutionText;
 
-        public ItemViewHolder(@NonNull View itemView) {
+        ItemViewHolder(@NonNull View itemView) {
             super(itemView);
             resolutionText = itemView.findViewById(R.id.tv_resolution);
         }
@@ -64,7 +63,6 @@ public class ResolutionItemAdapter extends RecyclerView.Adapter<ResolutionItemAd
                 onItemClickListener.onResolutionChosen(resolutionList.get(position));
             }
         });
-        Log.d("CHECK", "onBindViewHolder: " + holder.resolutionText.getText().toString() + " :  " + (defaultResolution));
         if (holder.resolutionText.getText().toString().equals(defaultResolution)) {
             holder.resolutionText.setTextColor(Color.BLACK);
             holder.itemView.setBackground(mContext.getResources().getDrawable(R.drawable.background_corner_round_light_color));

@@ -23,7 +23,7 @@ public class AboutActivity extends Activity {
         titleText.setText(R.string.about_text);
         optionText.setVisibility(View.GONE);
         Button checkUpdateButton = findViewById(R.id.b_check_for_update);
-        appVersion.setText(String.valueOf(ToolUtil.getVerName(this)));
+        appVersion.setText(ToolUtil.getVerName(this));
         backButton.setOnClickListener(view -> onBackPressed());
     }
 }

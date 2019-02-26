@@ -12,7 +12,6 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.SurfaceHolder;
 
 import com.arixo.arixoglass.R;
@@ -67,7 +66,6 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
     private ServiceInitListener mServiceInitListener = new ServiceInitListener() {
         @Override
         public void onInitStatus(boolean status) {
-            Log.d(TAG, "onInitStatus: " + status);
             try {
                 if (status) {
                     DeviceClient mDeviceClient = ArixoGlassSDKManager.getInstance().getDeviceClient();
@@ -75,11 +73,6 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
                         mDeviceClient.registerDeviceListener(mDeviceConnectListener);
                     }
                     mCameraClient = ArixoGlassSDKManager.getInstance().getCameraClient();
-//                } else if (!mInitStatus) {
-//                    ArixoGlassSDKManager.getInstance().destroy();
-//                    SystemClock.sleep(100);
-//                    ArixoGlassSDKManager.getInstance()
-//                            .init(getView().getContext(), mServiceInitListener);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -90,27 +83,22 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
     private DeviceConnectListener mDeviceConnectListener = new DeviceConnectListener() {
         @Override
         public void onAttach(UsbDevice usbDevice) {
-            Log.d(TAG, "onAttach: ");
         }
 
         @Override
         public void onDeAttach(UsbDevice usbDevice) {
-            Log.d(TAG, "onDeAttach: ");
         }
 
         @Override
         public void onConnect(UsbDevice usbDevice) {
-            Log.d(TAG, "onConnect: ");
             if (mCameraClient == null) {
                 mCameraClient = ArixoGlassSDKManager.getInstance().getCameraClient();
-                Log.d(TAG, "onConnect: on");
             }
             openCamera();
         }
 
         @Override
         public void onDisconnect(UsbDevice usbDevice) {
-            Log.d(TAG, "onDisconnect: ");
             if (mCameraClient != null) {
                 mCameraClient.disconnect();
                 mCameraClient = null;
@@ -126,7 +114,6 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
     private CameraClientCallback mClientCallback = new CameraClientCallback() {
         @Override
         public void onCameraOpened() {
-            Log.d(TAG, "onCameraOpened: ");
             if (mCameraClient != null) {
                 mCameraClient.addSurface(getView().getCameraVew().getHolder().getSurface(), false);
             }
@@ -134,7 +121,6 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
 
         @Override
         public void onCameraClosed() {
-            Log.d(TAG, "onCameraClosed: ");
             if (mCameraClient != null) {
                 mCameraClient.removeSurface(getView().getCameraVew().getHolder().getSurface());
             }
@@ -144,7 +130,6 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
         if (mCameraClient != null) {
-            Log.d(TAG, "surfaceCreated: on");
             mCameraClient.addSurface(surfaceHolder.getSurface(), false);
         }
     }
@@ -163,9 +148,6 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
 
     @Override
     public void openCamera() {
-        if (mCameraClient != null) {
-            Log.i(TAG, "openCamera: ");
-        }
         if (mCameraClient != null && !mCameraClient.isOpened()) {
             int[] resolution = getPreviewResolution();
             mCameraClient.open(resolution[0], resolution[1], mClientCallback);
@@ -208,7 +190,6 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
 
     @Override
     public void closeCamera() {
-        Log.d(TAG, "closeCamera: ");
         if (mCameraClient != null && mCameraClient.isOpened()) {
             mCameraClient.disconnect();
             mCameraClient.release();

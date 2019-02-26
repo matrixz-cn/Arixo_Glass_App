@@ -38,9 +38,6 @@ public class SettingActivity extends BaseActivity<ISettingModel, ISettingView, I
     private LinearLayout lcdBrightnessSettingBox;
     private TextView burstShotCountText;
     private SeekBar burstShotCountBar;
-    private RadioButton brightnessLowButton;
-    private RadioButton brightnessMediumButton;
-    private RadioButton brightnessHighButton;
 
     private BluetoothSelectionDialog bluetoothSelectionDialog;
     private BluetoothConnectingDialog bluetoothConnectingDialog;
@@ -87,9 +84,9 @@ public class SettingActivity extends BaseActivity<ISettingModel, ISettingView, I
         TextView backButton = findViewById(R.id.tv_backward_button);
         TextView resolutionSettingButton = findViewById(R.id.tv_resolution_setting);
         TextView aboutButton = findViewById(R.id.tv_about);
-        brightnessLowButton = findViewById(R.id.rb_brightness_low);
-        brightnessMediumButton = findViewById(R.id.rb_brightness_medium);
-        brightnessHighButton = findViewById(R.id.rb_brightness_high);
+        RadioButton brightnessLowButton = findViewById(R.id.rb_brightness_low);
+        RadioButton brightnessMediumButton = findViewById(R.id.rb_brightness_medium);
+        RadioButton brightnessHighButton = findViewById(R.id.rb_brightness_high);
 
         burstShotCountBar.setOnSeekBarChangeListener(this);
         burstShotSwitch.setOnCheckedChangeListener(this);

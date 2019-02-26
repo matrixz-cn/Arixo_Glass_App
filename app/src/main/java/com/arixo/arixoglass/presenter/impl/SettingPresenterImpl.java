@@ -59,12 +59,10 @@ public class SettingPresenterImpl extends BasePresenter<ISettingModel, ISettingV
     private DeviceConnectListener deviceConnectListener = new DeviceConnectListener() {
         @Override
         public void onAttach(UsbDevice device) {
-
         }
 
         @Override
         public void onDeAttach(UsbDevice device) {
-
         }
 
         @Override
@@ -85,7 +83,6 @@ public class SettingPresenterImpl extends BasePresenter<ISettingModel, ISettingV
 
         @Override
         public void onCancel(UsbDevice device) {
-
         }
     };
 
@@ -94,7 +91,6 @@ public class SettingPresenterImpl extends BasePresenter<ISettingModel, ISettingV
 
     @Override
     protected void onViewDestroy() {
-
     }
 
     @Override

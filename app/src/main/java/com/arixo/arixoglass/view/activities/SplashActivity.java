@@ -7,9 +7,7 @@ import android.hardware.usb.UsbDevice;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Process;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -35,52 +33,40 @@ public class SplashActivity extends BaseActivity<ISplashModel, ISplashView, Spla
 
     private TextView mStatusText;
 
-    private boolean mInitStatus;
 
     private ServiceInitListener mServiceInitListener = new ServiceInitListener() {
         @Override
         public void onInitStatus(boolean status) {
-            Log.d(TAG, "onInitStatus: " + status);
             try {
                 if (status) {
                     mDeviceClient = ArixoGlassSDKManager.getInstance().getDeviceClient();
                     if (mDeviceClient != null) {
                         mDeviceClient.registerDeviceListener(mDeviceConnectListener);
                     }
-                } else if (!mInitStatus) {
-                    ArixoGlassSDKManager.getInstance().destroy();
-                    SystemClock.sleep(100);
-                    ArixoGlassSDKManager.getInstance()
-                            .init(SplashActivity.this, mServiceInitListener);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            mInitStatus = status;
         }
     };
 
     private DeviceConnectListener mDeviceConnectListener = new DeviceConnectListener() {
         @Override
         public void onAttach(UsbDevice usbDevice) {
-            Log.d(TAG, "onAttach: ");
         }
 
         @Override
         public void onDeAttach(UsbDevice usbDevice) {
-            Log.d(TAG, "onDeAttach: ");
         }
 
         @Override
         public void onConnect(UsbDevice usbDevice) {
-            Log.d(TAG, "onConnect: ");
             mStatusText.setText(getResources().getString(R.string.connected_text));
             startMain();
         }
 
         @Override
         public void onDisconnect(UsbDevice usbDevice) {
-            Log.d(TAG, "onDisconnect: ");
         }
 
         @Override
@@ -116,11 +102,10 @@ public class SplashActivity extends BaseActivity<ISplashModel, ISplashView, Spla
         }
         if (!mRequestPermission.isEmpty()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                this.requestPermissions(mRequestPermission.toArray(new String[mRequestPermission.size()]), PERMISSION_REQ);
+                this.requestPermissions(mRequestPermission.toArray(new String[0]), PERMISSION_REQ);
             }
         } else {
             init();
-//            startMain();
         }
     }
 
@@ -135,7 +120,6 @@ public class SplashActivity extends BaseActivity<ISplashModel, ISplashView, Spla
                 }
             }
             init();
-//            startMain();
 
         }
     }

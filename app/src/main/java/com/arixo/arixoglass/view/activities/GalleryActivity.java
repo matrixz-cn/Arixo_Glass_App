@@ -30,8 +30,6 @@ public class GalleryActivity extends BaseActivity<IGalleryModel, IGalleryView, I
     private TextView optionButton;
     private TextView mSelectAllButton;
     private LinearLayout mFunctionBox;
-    private TabLayout mTabs;
-    private RecyclerView mGalleryItemsView;
     private GalleryItemAdapter mGalleryItemAdapter;
     private int tab = 0;
 
@@ -82,8 +80,8 @@ public class GalleryActivity extends BaseActivity<IGalleryModel, IGalleryView, I
         TextView deleteButton = findViewById(R.id.tv_delete);
         mSelectAllButton = findViewById(R.id.tv_select_all);
         optionButton = findViewById(R.id.tv_option_button);
-        mGalleryItemsView = findViewById(R.id.rv_gallery_item_view);
-        mTabs = findViewById(R.id.tl_tabs);
+        RecyclerView mGalleryItemsView = findViewById(R.id.rv_gallery_item_view);
+        TabLayout mTabs = findViewById(R.id.tl_tabs);
         mFunctionBox = findViewById(R.id.ll_option_box);
 
         // Set Action Listener
