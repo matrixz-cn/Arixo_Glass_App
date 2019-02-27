@@ -271,6 +271,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
                             handleRecording();
                             break;
                     }
+                    break;
             }
         }
     };
