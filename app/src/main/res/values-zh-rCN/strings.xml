@@ -7,7 +7,7 @@
     <string name="cancel">取消</string>
 
     <!-- Connection Status -->
-    <string name="uvc_wait_connect">等待连接</string>
+    <string name="uvc_wait_connect">请插入眼镜设备</string>
     <string name="uvc_disconnected">断开连接</string>
 
     <!-- Camera -->

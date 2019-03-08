@@ -10,7 +10,7 @@
     <string name="option_text" translatable="false">Option</string>
 
     <!-- Connection Status -->
-    <string name="uvc_wait_connect">Waiting For Connection</string>
+    <string name="uvc_wait_connect">Please plug in Arixo Glasses</string>
     <string name="uvc_disconnected">Disconnected</string>
 
     <!-- Camera -->
