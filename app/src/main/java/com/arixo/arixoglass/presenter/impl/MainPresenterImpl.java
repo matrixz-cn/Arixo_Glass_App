@@ -38,7 +38,7 @@ import com.arixo.glasssdk.serviceclient.LCDClient;
 /**
  * Created by lovart on 2019/1/24
  */
-public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> implements IMainPresenter, SurfaceHolder.Callback {
+public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> implements IMainPresenter {
 
     private static final String TAG = MainPresenterImpl.class.getSimpleName();
     private static final int BURST_SHOT = 0;
@@ -50,6 +50,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
     private boolean offActivity;
     private AudioManager mAudioManager;
     private MediaSession mMediaSession;
+    private LCDClient mLcdClient;
 
     @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler() {
@@ -70,7 +71,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
             Log.d(TAG, "onInitStatus: " + status);
             try {
                 if (status) {
-                    DeviceClient mDeviceClient = ArixoGlassSDKManager.getInstance().getDeviceClient();
+                    mDeviceClient = ArixoGlassSDKManager.getInstance().getDeviceClient();
                     if (mDeviceClient != null) {
                         mDeviceClient.registerDeviceListener(mDeviceConnectListener);
                     }
@@ -99,7 +100,6 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
             Log.d(TAG, "onConnect: ");
             if (mCameraClient == null) {
                 mCameraClient = ArixoGlassSDKManager.getInstance().getCameraClient();
-                Log.d(TAG, "onConnect: on");
             }
             if (mLcdClient != null) {
                 mLcdClient.setLCDLuminance(SystemParams.getInstance().getInt(Constant.DEFAULT_LCD_BRIGHTNESS_LEVEL, 10));
@@ -114,6 +114,9 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
                 mCameraClient.disconnect();
                 mCameraClient = null;
             }
+            if (mLcdClient != null) {
+                mLcdClient.stopCaptureRecord();
+            }
         }
 
         @Override
@@ -126,7 +129,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
         @Override
         public void onCameraOpened() {
             Log.d(TAG, "onCameraOpened: ");
-            if (mCameraClient != null) {
+            if (mCameraClient != null && getView().getCameraVew().getHolder().getSurface().isValid()) {
                 mCameraClient.addSurface(getView().getCameraVew().getHolder().getSurface(), false);
             }
         }
@@ -139,39 +142,38 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
             }
         }
     };
-    private LCDClient mLcdClient;
 
-    @Override
-    public void surfaceCreated(SurfaceHolder surfaceHolder) {
-        if (mCameraClient != null) {
-            Log.d(TAG, "surfaceCreated: on");
-            mCameraClient.addSurface(surfaceHolder.getSurface(), false);
+    private SurfaceHolder.Callback surfaceCallback = new SurfaceHolder.Callback() {
+        @Override
+        public void surfaceCreated(SurfaceHolder surfaceHolder) {
+            if (mCameraClient != null) {
+                mCameraClient.addSurface(surfaceHolder.getSurface(), false);
+            }
         }
-    }
 
-    @Override
-    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
+        @Override
+        public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
 
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-        if (mCameraClient != null) {
-            mCameraClient.removeSurface(surfaceHolder.getSurface());
         }
-    }
+
+        @Override
+        public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+            if (mCameraClient != null) {
+                mCameraClient.removeSurface(surfaceHolder.getSurface());
+            }
+        }
+    };
+    private DeviceClient mDeviceClient;
 
     @Override
     public void openCamera() {
-        if (mCameraClient != null) {
-            Log.i(TAG, "openCamera: ");
-        }
         if (mCameraClient != null && !mCameraClient.isOpened()) {
+            Log.i(TAG, "openCamera: ");
             int[] resolution = getPreviewResolution();
             mCameraClient.open(resolution[0], resolution[1], mClientCallback);
-//            mCameraClient.setPreviewFrameCallback((buffer, width, height) -> {
-//                Log.d(TAG, "PreviewFrameCallback: ");
-//            });
+            mCameraClient.setPreviewFrameCallback((buffer, width, height) ->
+                    Log.d(TAG, "PreviewFrameCallback: " + System.currentTimeMillis())
+            );
         }
     }
 
@@ -364,7 +366,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
 
     @Override
     public void initCameraService() {
-        getView().getCameraVew().getHolder().addCallback(this);
+        getView().getCameraVew().getHolder().addCallback(surfaceCallback);
         ArixoGlassSDKManager.getInstance().init(getView().getContext(), mServiceInitListener);
     }
 

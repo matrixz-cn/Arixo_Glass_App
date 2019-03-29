@@ -1,6 +1,7 @@
 package com.arixo.arixoglass.presenter.impl;
 
 import android.hardware.usb.UsbDevice;
+import android.util.Log;
 
 import com.arixo.arixoglass.R;
 import com.arixo.arixoglass.base.BasePresenter;
@@ -70,7 +71,7 @@ public class SettingPresenterImpl extends BasePresenter<ISettingModel, ISettingV
         @Override
         public void onConnect(UsbDevice device) {
             lcdClient = ArixoGlassSDKManager.getInstance().getLCDClient();
-            if (lcdClient != null) {
+            if (ArixoGlassSDKManager.getInstance().getCameraType() == CameraUtils.TYPE_USB_MOVIDIUS) {
                 getView().setLCDSwitchStatus(true);
                 getView().showLCDBrightnessSettingBox();
             }
@@ -155,6 +156,12 @@ public class SettingPresenterImpl extends BasePresenter<ISettingModel, ISettingV
 
     @Override
     public void handleOSDSetting(boolean isOSD) {
+        if (!deviceClient.isConnected()) {
+            getView().showToast(getView().getContext().getResources().getString(R.string.uvc_wait_connect));
+            getView().setOSDSwitchStatus(false);
+            return;
+        }
+        lcdClient = ArixoGlassSDKManager.getInstance().getLCDClient();
         if (lcdClient != null && supportOSD()) {
             if (isOSD && !isOSD()) {
                 lcdClient.startCaptureRecord(getView().getContext());
@@ -169,6 +176,12 @@ public class SettingPresenterImpl extends BasePresenter<ISettingModel, ISettingV
 
     @Override
     public void handleLCDSetting(boolean checked) {
+        if (!deviceClient.isConnected()) {
+            getView().showToast(getView().getContext().getResources().getString(R.string.uvc_wait_connect));
+            getView().setLCDSwitchStatus(false);
+            getView().hideLCDBrightnessSettingBox();
+            return;
+        }
         SystemParams.getInstance().setBoolean(Constant.LCD_OPEN, checked);
         if (checked) {
             getView().showLCDBrightnessSettingBox();
@@ -181,6 +194,7 @@ public class SettingPresenterImpl extends BasePresenter<ISettingModel, ISettingV
 
     @Override
     public boolean isOSD() {
+        lcdClient = ArixoGlassSDKManager.getInstance().getLCDClient();
         if (lcdClient != null) {
             switch (lcdClient.getLCDDisplayMode()) {
                 case ILCDClient.LCD_MODE_ASYNC:
@@ -202,6 +216,7 @@ public class SettingPresenterImpl extends BasePresenter<ISettingModel, ISettingV
 
     @Override
     public void setLCDBrightnessLevel(int level) {
+        lcdClient = ArixoGlassSDKManager.getInstance().getLCDClient();
         if (lcdClient != null) {
             if (level > 0) {
                 SystemParams.getInstance().setInt(Constant.DEFAULT_LCD_BRIGHTNESS_LEVEL, level);
