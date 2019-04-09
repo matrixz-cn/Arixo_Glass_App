@@ -1,8 +1,10 @@
 package com.arixo.arixoglass.presenter.impl;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -71,7 +73,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
             Log.d(TAG, "onInitStatus: " + status);
             try {
                 if (status) {
-                    mDeviceClient = ArixoGlassSDKManager.getInstance().getDeviceClient();
+                    DeviceClient mDeviceClient = ArixoGlassSDKManager.getInstance().getDeviceClient();
                     if (mDeviceClient != null) {
                         mDeviceClient.registerDeviceListener(mDeviceConnectListener);
                     }
@@ -87,20 +89,19 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
     private DeviceConnectListener mDeviceConnectListener = new DeviceConnectListener() {
         @Override
         public void onAttach(UsbDevice usbDevice) {
-            Log.d(TAG, "onAttach: ");
+            Log.d(TAG, "Camera Device onAttach: ");
         }
 
         @Override
         public void onDeAttach(UsbDevice usbDevice) {
-            Log.d(TAG, "onDeAttach: ");
+            Log.d(TAG, "Camera Device onDeAttach: ");
         }
 
         @Override
         public void onConnect(UsbDevice usbDevice) {
-            Log.d(TAG, "onConnect: ");
-            if (mCameraClient == null) {
-                mCameraClient = ArixoGlassSDKManager.getInstance().getCameraClient();
-            }
+            Log.d(TAG, "Camera Device onConnect: ");
+            mCameraClient = ArixoGlassSDKManager.getInstance().getCameraClient();
+            mLcdClient = ArixoGlassSDKManager.getInstance().getLCDClient();
             if (mLcdClient != null) {
                 mLcdClient.setLCDLuminance(SystemParams.getInstance().getInt(Constant.DEFAULT_LCD_BRIGHTNESS_LEVEL, 10));
             }
@@ -109,7 +110,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
 
         @Override
         public void onDisconnect(UsbDevice usbDevice) {
-            Log.d(TAG, "onDisconnect: ");
+            Log.d(TAG, "Camera Device onDisconnect: ");
             if (mCameraClient != null) {
                 mCameraClient.disconnect();
                 mCameraClient = null;
@@ -128,7 +129,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
     private CameraClientCallback mClientCallback = new CameraClientCallback() {
         @Override
         public void onCameraOpened() {
-            Log.d(TAG, "onCameraOpened: ");
+            Log.d(TAG, "Camera Device onCameraOpened: ");
             if (mCameraClient != null && getView().getCameraVew().getHolder().getSurface().isValid()) {
                 mCameraClient.addSurface(getView().getCameraVew().getHolder().getSurface(), false);
             }
@@ -136,7 +137,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
 
         @Override
         public void onCameraClosed() {
-            Log.d(TAG, "onCameraClosed: ");
+            Log.d(TAG, "Camera Device onCameraClosed: ");
             if (mCameraClient != null) {
                 mCameraClient.removeSurface(getView().getCameraVew().getHolder().getSurface());
             }
@@ -163,59 +164,6 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
             }
         }
     };
-    private DeviceClient mDeviceClient;
-
-    @Override
-    public void openCamera() {
-        if (mCameraClient != null && !mCameraClient.isOpened()) {
-            Log.i(TAG, "openCamera: ");
-            int[] resolution = getPreviewResolution();
-            mCameraClient.open(resolution[0], resolution[1], mClientCallback);
-            mCameraClient.setPreviewFrameCallback((buffer, width, height) ->
-                    Log.d(TAG, "PreviewFrameCallback: " + System.currentTimeMillis())
-            );
-        }
-    }
-
-    @Override
-    public int[] getPreviewResolution() {
-        int[] resolution = new int[2];
-        String savedResolution = SystemParams.getInstance().getString(Constant.PREVIEW_RESOLUTION, Constant.DEFAULT_RESOLUTION);
-        String[] resolutions = savedResolution.split("x");
-        resolution[0] = Integer.parseInt(resolutions[0]);
-        resolution[1] = Integer.parseInt(resolutions[1]);
-        return resolution;
-    }
-
-    @Override
-    public void setOffActivity(boolean offActivity) {
-        this.offActivity = offActivity;
-        if (mAudioManager == null) {
-            mAudioManager = (AudioManager) getView().getContext().getSystemService(Context.AUDIO_SERVICE);
-        }
-        if (!offActivity) {
-            if (mAudioManager != null && !mAudioManager.isBluetoothScoOn()) {
-                mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                mAudioManager.startBluetoothSco();
-                mAudioManager.setBluetoothScoOn(true);
-            }
-            final MediaPlayer mediaPlayer = MediaPlayer.create(getView().getContext(), R.raw.camera_click);
-            mediaPlayer.setVolume(0, 0);
-            mediaPlayer.setOnCompletionListener(mp -> mediaPlayer.release());
-            mediaPlayer.start();
-            mAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
-            createMediaSession();
-        }
-    }
-
-    @Override
-    public void closeCamera() {
-        Log.d(TAG, "closeCamera: ");
-        if (mCameraClient != null && mCameraClient.isOpened()) {
-            mCameraClient.disconnect();
-            mCameraClient.release();
-        }
-    }
 
     private IBluetoothServiceCommunication.BluetoothDeviceConnectionListener bluetoothDeviceConnectionListener
             = new IBluetoothServiceCommunication.BluetoothDeviceConnectionListener() {
@@ -230,12 +178,14 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
             getView().showToast(getView().getContext().getResources().getString(R.string.success_connect_text));
             getView().dismissConnectionDialog();
             getView().dismissSelectionDialog();
+            openSco();
         }
 
         @Override
         public void onDisconnected() {
             getView().showToast(getView().getContext().getResources().getString(R.string.device_disconnected_text));
             getView().dismissConnectionDialog();
+            closeSco();
         }
 
         @Override
@@ -298,8 +248,77 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
         }
     };
 
+    /**
+     * 开启Camera
+     */
+    @Override
+    public void openCamera() {
+        if (mCameraClient != null && !mCameraClient.isOpened()) {
+            Log.i(TAG, "openCamera: ");
+            int[] resolution = getPreviewResolution();
+            mCameraClient.open(resolution[0], resolution[1], mClientCallback);
+
+            // 摄像头回调帧，如需要取消注释
+//            mCameraClient.setPreviewFrameCallback((buffer, width, height) -> {
+//                Log.d(TAG, "PreviewFrameCallback: " + System.currentTimeMillis());
+//            });
+        }
+    }
+
+    /**
+     * 获取Camera预览分辨率
+     *
+     * @return 分辨率，如：[1280,720]
+     */
+    @Override
+    public int[] getPreviewResolution() {
+        int[] resolution = new int[2];
+        String savedResolution = SystemParams.getInstance().getString(Constant.PREVIEW_RESOLUTION, Constant.DEFAULT_RESOLUTION);
+        String[] resolutions = savedResolution.split("x");
+        resolution[0] = Integer.parseInt(resolutions[0]);
+        resolution[1] = Integer.parseInt(resolutions[1]);
+        return resolution;
+    }
+
+    /**
+     * 设置View是否暂停
+     *
+     * @param offActivity 是否暂停
+     */
+    @Override
+    public void setOffActivity(boolean offActivity) {
+        this.offActivity = offActivity;
+        if (mAudioManager == null) {
+            mAudioManager = (AudioManager) getView().getContext().getSystemService(Context.AUDIO_SERVICE);
+        }
+        if (!offActivity) {
+            final MediaPlayer mediaPlayer = MediaPlayer.create(getView().getContext(), R.raw.camera_click);
+            mediaPlayer.setVolume(0, 0);
+            mediaPlayer.setOnCompletionListener(mp -> mediaPlayer.release());
+            mediaPlayer.start();
+            mAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+            createMediaSession();
+        }
+    }
+
+    /**
+     * 关闭Camera
+     */
+    @Override
+    public void closeCamera() {
+        Log.d(TAG, "closeCamera: ");
+        if (mCameraClient != null && mCameraClient.isOpened()) {
+            mCameraClient.disconnect();
+            mCameraClient.release();
+        }
+    }
+
+    /**
+     * 处理录像
+     */
     @Override
     public void handleRecording() {
+        mCameraClient = ArixoGlassSDKManager.getInstance().getCameraClient();
         if (mCameraClient != null && !mCameraClient.isRecording()) {
             startTime = SystemClock.elapsedRealtime();
             mCameraClient.startRecording(FileUtil.getVideoBasePath().getAbsolutePath());
@@ -310,6 +329,9 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
         }
     }
 
+    /**
+     * 处理拍照
+     */
     @Override
     public void handleCapture() {
         if (mCameraClient != null) {
@@ -333,17 +355,25 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
                 if (burstShotCount <= 0) {
                     burstShot = false;
                 }
-            } while (burstShot);
+            } while (burstShot); // 如果为连拍模式，继续拍照
             getView().showToast(getView().getContext().getResources().getString(R.string.picture_token, pictureToken));
         }
     }
 
+    /**
+     * 处理长按
+     */
     @Override
     public void handleLongClick() {
         burstShot = SystemParams.getInstance().getBoolean(Constant.USE_BURST_SHOT, false);
         handleCapture();
     }
 
+    /**
+     * 获取录像时间
+     *
+     * @return ”00：00：00“格式时间
+     */
     @Override
     public String getTime() {
         if (model != null) {
@@ -356,20 +386,24 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
     protected void onViewDestroy() {
         if (mAudioManager != null) {
             mAudioManager.setMode(AudioManager.MODE_NORMAL);
-            mAudioManager.stopBluetoothSco();
-            mAudioManager.setBluetoothScoOn(false);
+            closeSco();
             mAudioManager.abandonAudioFocus(null);
         }
         releaseMediaSession();
     }
 
-
+    /**
+     * 初始化设备服务
+     */
     @Override
     public void initCameraService() {
         getView().getCameraVew().getHolder().addCallback(surfaceCallback);
         ArixoGlassSDKManager.getInstance().init(getView().getContext(), mServiceInitListener);
     }
 
+    /**
+     * 初始化蓝牙连接服务
+     */
     @Override
     public void initBluetoothService() {
         BluetoothServiceConnection.getInstance()
@@ -379,6 +413,9 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
                 .init(getView().getContext());
     }
 
+    /**
+     * 销毁设备服务
+     */
     @Override
     public void unInitCameraService() {
         if (mLcdClient != null && mLcdClient.isScreenSyncing()) {
@@ -387,6 +424,9 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
         ArixoGlassSDKManager.getInstance().destroy();
     }
 
+    /**
+     * 销毁蓝牙连接服务
+     */
     @Override
     public void unInitBluetoothService() {
         BluetoothServiceConnection.getInstance()
@@ -394,6 +434,53 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
                 .unregisterBluetoothEventListener(eventListener)
                 .unregisterBluetoothDeviceConnectionListener(bluetoothDeviceConnectionListener)
                 .destroy();
+    }
+
+    /**
+     * 开启蓝牙SCO
+     */
+    private void openSco() {
+        if (!mAudioManager.isBluetoothScoAvailableOffCall()) {
+            Log.d(TAG, "系统不支持蓝牙录音");
+            return;
+        }
+        //蓝牙录音的关键，启动SCO连接，耳机话筒才起作用
+        //蓝牙SCO连接建立需要时间，连接建立后会发出ACTION_SCO_AUDIO_STATE_CHANGED消息，通过接收该消息而进入后续逻辑。
+        //也有可能此时SCO已经建立，则不会收到上述消息，可以startBluetoothSco()前先 stopBluetoothSco()
+        if (mAudioManager.isBluetoothScoOn()) {
+            mAudioManager.stopBluetoothSco();
+            mAudioManager.setBluetoothScoOn(false);
+        }
+        getView().getContext().registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
+                Log.d(TAG, "Audio SCO state: " + state);
+                if (AudioManager.SCO_AUDIO_STATE_CONNECTED == state) {
+                    mAudioManager.setBluetoothScoOn(true);  //打开SCO
+                    getView().getContext().unregisterReceiver(this);  //别遗漏
+                    Log.d(TAG, "Audio SCO connected");
+                } else {//等待一秒后再尝试启动SCO
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    mAudioManager.startBluetoothSco();
+                }
+            }
+        }, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
+        mAudioManager.startBluetoothSco();
+    }
+
+    /**
+     * 关闭蓝牙SCO
+     */
+    private void closeSco() {
+        if (mAudioManager.isBluetoothScoOn()) {
+            mAudioManager.setBluetoothScoOn(false);
+            mAudioManager.stopBluetoothSco();
+        }
     }
 
     private void createMediaSession() {
