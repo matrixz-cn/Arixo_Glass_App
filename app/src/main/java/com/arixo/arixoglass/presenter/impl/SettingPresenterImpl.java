@@ -156,7 +156,8 @@ public class SettingPresenterImpl extends BasePresenter<ISettingModel, ISettingV
 
     @Override
     public void handleOSDSetting(boolean isOSD) {
-        if (!deviceClient.isConnected()) {
+        deviceClient = ArixoGlassSDKManager.getInstance().getDeviceClient();
+        if (deviceClient == null || !deviceClient.isConnected()) {
             getView().showToast(getView().getContext().getResources().getString(R.string.uvc_wait_connect));
             getView().setOSDSwitchStatus(false);
             return;
@@ -176,7 +177,8 @@ public class SettingPresenterImpl extends BasePresenter<ISettingModel, ISettingV
 
     @Override
     public void handleLCDSetting(boolean checked) {
-        if (!deviceClient.isConnected()) {
+        deviceClient = ArixoGlassSDKManager.getInstance().getDeviceClient();
+        if (deviceClient == null || !deviceClient.isConnected()) {
             getView().showToast(getView().getContext().getResources().getString(R.string.uvc_wait_connect));
             getView().setLCDSwitchStatus(false);
             getView().hideLCDBrightnessSettingBox();
