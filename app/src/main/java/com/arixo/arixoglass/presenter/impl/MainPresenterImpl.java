@@ -37,6 +37,8 @@ import com.arixo.glasssdk.serviceclient.CameraClient;
 import com.arixo.glasssdk.serviceclient.DeviceClient;
 import com.arixo.glasssdk.serviceclient.LCDClient;
 
+import static android.content.Context.AUDIO_SERVICE;
+
 /**
  * Created by lovart on 2019/1/24
  */
@@ -53,6 +55,28 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
     private AudioManager mAudioManager;
     private MediaSession mMediaSession;
     private LCDClient mLcdClient;
+    private boolean scoReceiverRegistered = true;
+
+    private BroadcastReceiver bluetoothSCOReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
+            Log.d(TAG, "Audio SCO state: " + state);
+            if (AudioManager.SCO_AUDIO_STATE_CONNECTED == state) {
+                mAudioManager.setBluetoothScoOn(true);  //打开SCO
+                scoReceiverRegistered = false;
+                getView().getContext().unregisterReceiver(this);  //别遗漏
+                Log.d(TAG, "Audio SCO connected");
+            } else {//等待一秒后再尝试启动SCO
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                mAudioManager.startBluetoothSco();
+            }
+        }
+    };
 
     @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler() {
@@ -66,26 +90,23 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
             }
         }
     };
-
-    private ServiceInitListener mServiceInitListener = new ServiceInitListener() {
+    private CameraClientCallback mClientCallback = new CameraClientCallback() {
         @Override
-        public void onInitStatus(boolean status) {
-            Log.d(TAG, "onInitStatus: " + status);
-            try {
-                if (status) {
-                    DeviceClient mDeviceClient = ArixoGlassSDKManager.getInstance().getDeviceClient();
-                    if (mDeviceClient != null) {
-                        mDeviceClient.registerDeviceListener(mDeviceConnectListener);
-                    }
-                    mCameraClient = ArixoGlassSDKManager.getInstance().getCameraClient();
-                    mLcdClient = ArixoGlassSDKManager.getInstance().getLCDClient();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+        public void onCameraOpened() {
+            Log.d(TAG, "Camera Device onCameraOpened: ");
+            if (mCameraClient != null && getView().getCameraVew().getHolder().getSurface().isValid()) {
+                mCameraClient.addSurface(getView().getCameraVew().getHolder().getSurface(), false);
+            }
+        }
+
+        @Override
+        public void onCameraClosed() {
+            Log.d(TAG, "Camera Device onCameraClosed: ");
+            if (mCameraClient != null) {
+                mCameraClient.removeSurface(getView().getCameraVew().getHolder().getSurface());
             }
         }
     };
-
     private DeviceConnectListener mDeviceConnectListener = new DeviceConnectListener() {
         @Override
         public void onAttach(UsbDevice usbDevice) {
@@ -125,25 +146,24 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
 
         }
     };
-
-    private CameraClientCallback mClientCallback = new CameraClientCallback() {
+    private ServiceInitListener mServiceInitListener = new ServiceInitListener() {
         @Override
-        public void onCameraOpened() {
-            Log.d(TAG, "Camera Device onCameraOpened: ");
-            if (mCameraClient != null && getView().getCameraVew().getHolder().getSurface().isValid()) {
-                mCameraClient.addSurface(getView().getCameraVew().getHolder().getSurface(), false);
-            }
-        }
-
-        @Override
-        public void onCameraClosed() {
-            Log.d(TAG, "Camera Device onCameraClosed: ");
-            if (mCameraClient != null) {
-                mCameraClient.removeSurface(getView().getCameraVew().getHolder().getSurface());
+        public void onInitStatus(boolean status) {
+            Log.d(TAG, "onInitStatus: " + status);
+            try {
+                if (status) {
+                    DeviceClient mDeviceClient = ArixoGlassSDKManager.getInstance().getDeviceClient();
+                    if (mDeviceClient != null) {
+                        mDeviceClient.registerDeviceListener(mDeviceConnectListener);
+                    }
+                    mCameraClient = ArixoGlassSDKManager.getInstance().getCameraClient();
+                    mLcdClient = ArixoGlassSDKManager.getInstance().getLCDClient();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     };
-
     private SurfaceHolder.Callback surfaceCallback = new SurfaceHolder.Callback() {
         @Override
         public void surfaceCreated(SurfaceHolder surfaceHolder) {
@@ -178,14 +198,12 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
             getView().showToast(getView().getContext().getResources().getString(R.string.success_connect_text));
             getView().dismissConnectionDialog();
             getView().dismissSelectionDialog();
-            openSco();
         }
 
         @Override
         public void onDisconnected() {
             getView().showToast(getView().getContext().getResources().getString(R.string.device_disconnected_text));
             getView().dismissConnectionDialog();
-            closeSco();
         }
 
         @Override
@@ -259,9 +277,9 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
             mCameraClient.open(resolution[0], resolution[1], mClientCallback);
 
             // 摄像头回调帧，如需要取消注释
-//            mCameraClient.setPreviewFrameCallback((buffer, width, height) -> {
-//                Log.d(TAG, "PreviewFrameCallback: " + System.currentTimeMillis());
-//            });
+            mCameraClient.setPreviewFrameCallback((buffer, width, height) -> {
+                Log.d(TAG, "PreviewFrameCallback: " + System.currentTimeMillis());
+            });
         }
     }
 
@@ -287,10 +305,10 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
      */
     @Override
     public void setOffActivity(boolean offActivity) {
-        this.offActivity = offActivity;
         if (mAudioManager == null) {
-            mAudioManager = (AudioManager) getView().getContext().getSystemService(Context.AUDIO_SERVICE);
+            mAudioManager = (AudioManager) getView().getContext().getSystemService(AUDIO_SERVICE);
         }
+        this.offActivity = offActivity;
         if (!offActivity) {
             final MediaPlayer mediaPlayer = MediaPlayer.create(getView().getContext(), R.raw.camera_click);
             mediaPlayer.setVolume(0, 0);
@@ -298,6 +316,17 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
             mediaPlayer.start();
             mAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
             createMediaSession();
+            if (!mAudioManager.isBluetoothScoOn()) {
+                openSco();
+            }
+        } else {
+            if (mAudioManager != null) {
+                mAudioManager.abandonAudioFocus(null);
+                if (mAudioManager.isBluetoothScoOn()) {
+                    closeSco();
+                }
+            }
+            releaseMediaSession();
         }
     }
 
@@ -384,12 +413,9 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
 
     @Override
     protected void onViewDestroy() {
-        if (mAudioManager != null) {
-            mAudioManager.setMode(AudioManager.MODE_NORMAL);
-            closeSco();
-            mAudioManager.abandonAudioFocus(null);
+        if (scoReceiverRegistered) {
+            getView().getContext().unregisterReceiver(bluetoothSCOReceiver);
         }
-        releaseMediaSession();
     }
 
     /**
@@ -451,25 +477,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
             mAudioManager.stopBluetoothSco();
             mAudioManager.setBluetoothScoOn(false);
         }
-        getView().getContext().registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
-                Log.d(TAG, "Audio SCO state: " + state);
-                if (AudioManager.SCO_AUDIO_STATE_CONNECTED == state) {
-                    mAudioManager.setBluetoothScoOn(true);  //打开SCO
-                    getView().getContext().unregisterReceiver(this);  //别遗漏
-                    Log.d(TAG, "Audio SCO connected");
-                } else {//等待一秒后再尝试启动SCO
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    mAudioManager.startBluetoothSco();
-                }
-            }
-        }, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
+        getView().getContext().registerReceiver(bluetoothSCOReceiver, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
         mAudioManager.startBluetoothSco();
     }
 
