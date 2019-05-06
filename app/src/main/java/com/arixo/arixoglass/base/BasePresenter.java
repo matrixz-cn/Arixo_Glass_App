@@ -32,11 +32,11 @@ public abstract class BasePresenter<M extends Model, V extends View> implements 
      */
     @Override
     public void destroy() {
+        onViewDestroy();
         if (wrf != null) {
             wrf.clear();
             wrf = null;
         }
-        onViewDestroy();
     }
 
     protected abstract void onViewDestroy();

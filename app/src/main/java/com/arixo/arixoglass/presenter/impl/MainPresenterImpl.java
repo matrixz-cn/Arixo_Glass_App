@@ -57,6 +57,15 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
     private LCDClient mLcdClient;
     private boolean scoReceiverRegistered = true;
 
+    @SuppressLint("HandlerLeak")
+    private Handler bluetoothSCORetryHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            mAudioManager.startBluetoothSco();
+            super.handleMessage(msg);
+        }
+    };
+
     private BroadcastReceiver bluetoothSCOReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -67,13 +76,9 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
                 scoReceiverRegistered = false;
                 getView().getContext().unregisterReceiver(this);  //别遗漏
                 Log.d(TAG, "Audio SCO connected");
+                bluetoothSCORetryHandler.removeMessages(0);
             } else {//等待一秒后再尝试启动SCO
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                mAudioManager.startBluetoothSco();
+                bluetoothSCORetryHandler.sendEmptyMessageDelayed(0, 1000);
             }
         }
     };
@@ -277,9 +282,9 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
             mCameraClient.open(resolution[0], resolution[1], mClientCallback);
 
             // 摄像头回调帧，如需要取消注释
-            mCameraClient.setPreviewFrameCallback((buffer, width, height) -> {
-                Log.d(TAG, "PreviewFrameCallback: " + System.currentTimeMillis());
-            });
+//            mCameraClient.setPreviewFrameCallback((buffer, width, height) -> {
+//                Log.d(TAG, "PreviewFrameCallback: " + System.currentTimeMillis());
+//            });
         }
     }
 
