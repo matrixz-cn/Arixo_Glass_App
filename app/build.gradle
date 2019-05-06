@@ -1,8 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
-    def gitCommitCount = 10000 + Integer.parseInt('git rev-list HEAD --count'.execute([], project.rootDir).text.trim())
-    def gitCurrentTag = 'git describe --tags --abbrev=0'.execute([], project.rootDir).text.trim()
+//    def gitCommitCount = 10000 + Integer.parseInt('git rev-list HEAD --count'.execute([], project.rootDir).text.trim())
+//    def gitCurrentTag = 'git describe --tags --abbrev=0'.execute([], project.rootDir).text.trim()
 
     android.applicationVariants.all { variant ->
         variant.outputs.all {
@@ -25,8 +25,8 @@ android {
         applicationId "com.arixo.arixoglass"
         minSdkVersion versionMin
         targetSdkVersion versionTarget
-        versionCode gitCommitCount
-        versionName gitCurrentTag
+        versionCode 1
+        versionName "1.0"
         multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }

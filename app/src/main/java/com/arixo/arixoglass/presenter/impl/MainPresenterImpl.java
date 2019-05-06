@@ -46,6 +46,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
 
     private static final String TAG = MainPresenterImpl.class.getSimpleName();
     private static final int BURST_SHOT = 0;
+    private static final int RETRY_BLUETOOTH_SCO = 1;
 
     private CameraClient mCameraClient;
     private long startTime;
@@ -58,11 +59,18 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
     private boolean scoReceiverRegistered = true;
 
     @SuppressLint("HandlerLeak")
-    private Handler bluetoothSCORetryHandler = new Handler() {
+    private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            mAudioManager.startBluetoothSco();
             super.handleMessage(msg);
+            switch (msg.what) {
+                case BURST_SHOT:
+                    handleCapture();
+                    break;
+                case RETRY_BLUETOOTH_SCO:
+                    mAudioManager.startBluetoothSco();
+                    break;
+            }
         }
     };
 
@@ -76,25 +84,13 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
                 scoReceiverRegistered = false;
                 getView().getContext().unregisterReceiver(this);  //别遗漏
                 Log.d(TAG, "Audio SCO connected");
-                bluetoothSCORetryHandler.removeMessages(0);
+                mHandler.removeMessages(RETRY_BLUETOOTH_SCO);
             } else {//等待一秒后再尝试启动SCO
-                bluetoothSCORetryHandler.sendEmptyMessageDelayed(0, 1000);
+                mHandler.sendEmptyMessageDelayed(RETRY_BLUETOOTH_SCO, 1000);
             }
         }
     };
 
-    @SuppressLint("HandlerLeak")
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case BURST_SHOT:
-                    handleCapture();
-                    break;
-            }
-        }
-    };
     private CameraClientCallback mClientCallback = new CameraClientCallback() {
         @Override
         public void onCameraOpened() {
