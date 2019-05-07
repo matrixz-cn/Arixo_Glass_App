@@ -2,21 +2,23 @@ package com.arixo.arixoglass.utils;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.icu.text.SimpleDateFormat;
 import android.text.format.Time;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by lovart on 2019/2/1
  */
 public class ToolUtil {
 
+    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.CHINA);
+
     public static String getTime() {
-        long current = System.currentTimeMillis();
         String time;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            time = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date(current));
+            time = simpleDateFormat.format(new Date());
         } else {
             Time t = new Time(); // or Time t=new Time("GMT+8"); 加上Time Zone资料。
             t.setToNow(); // 取得系统时间。
