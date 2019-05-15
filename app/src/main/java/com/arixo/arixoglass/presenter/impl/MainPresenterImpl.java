@@ -96,7 +96,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
         public void onCameraOpened() {
             Log.d(TAG, "Camera Device onCameraOpened: ");
             if (mCameraClient != null && getView().getCameraVew().getHolder().getSurface().isValid()) {
-                mCameraClient.addSurface(getView().getCameraVew().getHolder().getSurface(), false);
+                mCameraClient.addSurface(getView().getCameraVew().getHolder().getSurface());
             }
         }
 
@@ -169,7 +169,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
         @Override
         public void surfaceCreated(SurfaceHolder surfaceHolder) {
             if (mCameraClient != null) {
-                mCameraClient.addSurface(surfaceHolder.getSurface(), false);
+                mCameraClient.addSurface(surfaceHolder.getSurface());
             }
         }
 
