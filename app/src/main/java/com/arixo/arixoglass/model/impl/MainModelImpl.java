@@ -1,10 +1,9 @@
 package com.arixo.arixoglass.model.impl;
 
-import android.os.SystemClock;
-
 import com.arixo.arixoglass.model.IMainModel;
 
-import java.text.DecimalFormat;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by lovart on 2019/1/24
@@ -13,10 +12,10 @@ public class MainModelImpl implements IMainModel {
 
     @Override
     public String getTimeFrom(long startTime) {
-        int time = (int) ((SystemClock.elapsedRealtime() - startTime) / 1000);
-        String hh = new DecimalFormat("00").format(time / 3600);
-        String mm = new DecimalFormat("00").format(time % 3600 / 60);
-        String ss = new DecimalFormat("00").format(time % 60);
-        return hh + ":" + mm + ":" + ss;
+        long diff = System.currentTimeMillis() - startTime;
+        long hour = TimeUnit.MILLISECONDS.toHours(diff);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(diff);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(diff);
+        return String.format(Locale.CHINA, "%02d:%02d:%02d", hour, minutes % 60, seconds % 60);
     }
 }

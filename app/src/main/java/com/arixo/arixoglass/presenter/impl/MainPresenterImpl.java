@@ -11,12 +11,12 @@ import android.media.MediaPlayer;
 import android.media.session.MediaSession;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+import com.arixo.arixoglass.MainApplication;
 import com.arixo.arixoglass.R;
 import com.arixo.arixoglass.base.BasePresenter;
 import com.arixo.arixoglass.model.IMainModel;
@@ -37,8 +37,6 @@ import com.arixo.glasssdk.serviceclient.CameraClient;
 import com.arixo.glasssdk.serviceclient.DeviceClient;
 import com.arixo.glasssdk.serviceclient.LCDClient;
 
-import static android.content.Context.AUDIO_SERVICE;
-
 /**
  * Created by lovart on 2019/1/24
  */
@@ -46,7 +44,6 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
 
     private static final String TAG = MainPresenterImpl.class.getSimpleName();
     private static final int BURST_SHOT = 0;
-    private static final int RETRY_BLUETOOTH_SCO = 1;
 
     private CameraClient mCameraClient;
     private long startTime;
@@ -56,7 +53,6 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
     private AudioManager mAudioManager;
     private MediaSession mMediaSession;
     private LCDClient mLcdClient;
-    private boolean scoReceiverRegistered = true;
 
     @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler() {
@@ -67,30 +63,9 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
                 case BURST_SHOT:
                     handleCapture();
                     break;
-                case RETRY_BLUETOOTH_SCO:
-                    mAudioManager.startBluetoothSco();
-                    break;
             }
         }
     };
-
-    private BroadcastReceiver bluetoothSCOReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
-            Log.d(TAG, "Audio SCO state: " + state);
-            if (AudioManager.SCO_AUDIO_STATE_CONNECTED == state) {
-                mAudioManager.setBluetoothScoOn(true);  //打开SCO
-                scoReceiverRegistered = false;
-                getView().getContext().unregisterReceiver(this);  //别遗漏
-                Log.d(TAG, "Audio SCO connected");
-                mHandler.removeMessages(RETRY_BLUETOOTH_SCO);
-            } else {//等待一秒后再尝试启动SCO
-                mHandler.sendEmptyMessageDelayed(RETRY_BLUETOOTH_SCO, 1000);
-            }
-        }
-    };
-
     private CameraClientCallback mClientCallback = new CameraClientCallback() {
         @Override
         public void onCameraOpened() {
@@ -186,6 +161,18 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
         }
     };
 
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
+            Log.d(TAG, "Audio SCO state: " + state);
+            if (AudioManager.SCO_AUDIO_STATE_CONNECTED == state) {
+                mAudioManager.setBluetoothScoOn(true);  //打开SCO
+                Log.d(TAG, "Audio SCO connected: " + mAudioManager.isBluetoothScoOn());
+            }
+        }
+    };
+
     private IBluetoothServiceCommunication.BluetoothDeviceConnectionListener bluetoothDeviceConnectionListener
             = new IBluetoothServiceCommunication.BluetoothDeviceConnectionListener() {
         @Override
@@ -199,12 +186,14 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
             getView().showToast(getView().getContext().getResources().getString(R.string.success_connect_text));
             getView().dismissConnectionDialog();
             getView().dismissSelectionDialog();
+            openSco();
         }
 
         @Override
         public void onDisconnected() {
             getView().showToast(getView().getContext().getResources().getString(R.string.device_disconnected_text));
             getView().dismissConnectionDialog();
+            closeSco();
         }
 
         @Override
@@ -306,10 +295,10 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
      */
     @Override
     public void setOffActivity(boolean offActivity) {
-        if (mAudioManager == null) {
-            mAudioManager = (AudioManager) getView().getContext().getSystemService(AUDIO_SERVICE);
-        }
         this.offActivity = offActivity;
+        if (mAudioManager == null) {
+            mAudioManager = (AudioManager) getView().getContext().getSystemService(Context.AUDIO_SERVICE);
+        }
         if (!offActivity) {
             final MediaPlayer mediaPlayer = MediaPlayer.create(getView().getContext(), R.raw.camera_click);
             mediaPlayer.setVolume(0, 0);
@@ -317,17 +306,6 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
             mediaPlayer.start();
             mAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
             createMediaSession();
-            if (!mAudioManager.isBluetoothScoOn()) {
-                openSco();
-            }
-        } else {
-            if (mAudioManager != null) {
-                mAudioManager.abandonAudioFocus(null);
-                if (mAudioManager.isBluetoothScoOn()) {
-                    closeSco();
-                }
-            }
-            releaseMediaSession();
         }
     }
 
@@ -350,7 +328,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
     public void handleRecording() {
         mCameraClient = ArixoGlassSDKManager.getInstance().getCameraClient();
         if (mCameraClient != null && !mCameraClient.isRecording()) {
-            startTime = SystemClock.elapsedRealtime();
+            startTime = System.currentTimeMillis();
             mCameraClient.startRecording(FileUtil.getVideoBasePath().getAbsolutePath());
             getView().setToRecord();
         } else if (mCameraClient != null && mCameraClient.isRecording()) {
@@ -414,9 +392,11 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
 
     @Override
     protected void onViewDestroy() {
-        if (scoReceiverRegistered) {
-            getView().getContext().unregisterReceiver(bluetoothSCOReceiver);
+        if (mAudioManager != null) {
+            closeSco();
+            mAudioManager.abandonAudioFocus(null);
         }
+        releaseMediaSession();
     }
 
     /**
@@ -433,6 +413,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
      */
     @Override
     public void initBluetoothService() {
+        MainApplication.getMyApplication().registerReceiver(broadcastReceiver, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
         BluetoothServiceConnection.getInstance()
                 .registerBluetoothDeviceConnectionListener(bluetoothDeviceConnectionListener)
                 .registerBluetoothActionListener(actionListener)
@@ -456,6 +437,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
      */
     @Override
     public void unInitBluetoothService() {
+        MainApplication.getMyApplication().unregisterReceiver(broadcastReceiver);  //别遗漏
         BluetoothServiceConnection.getInstance()
                 .unregisterBluetoothActionListener(actionListener)
                 .unregisterBluetoothEventListener(eventListener)
@@ -474,22 +456,20 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
         //蓝牙录音的关键，启动SCO连接，耳机话筒才起作用
         //蓝牙SCO连接建立需要时间，连接建立后会发出ACTION_SCO_AUDIO_STATE_CHANGED消息，通过接收该消息而进入后续逻辑。
         //也有可能此时SCO已经建立，则不会收到上述消息，可以startBluetoothSco()前先 stopBluetoothSco()
-        if (mAudioManager.isBluetoothScoOn()) {
-            mAudioManager.stopBluetoothSco();
-            mAudioManager.setBluetoothScoOn(false);
-        }
-        getView().getContext().registerReceiver(bluetoothSCOReceiver, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
-        mAudioManager.startBluetoothSco();
+        Log.d(TAG, "openSco: " + mAudioManager.isBluetoothScoOn());
+        mHandler.postDelayed(() -> {
+            mAudioManager.startBluetoothSco();
+        }, 1000);
     }
 
     /**
      * 关闭蓝牙SCO
      */
     private void closeSco() {
-        if (mAudioManager.isBluetoothScoOn()) {
-            mAudioManager.setBluetoothScoOn(false);
-            mAudioManager.stopBluetoothSco();
-        }
+        Log.d(TAG, "closeSco: " + mAudioManager.isBluetoothScoOn());
+
+        mAudioManager.setBluetoothScoOn(false);
+        mAudioManager.stopBluetoothSco();
     }
 
     private void createMediaSession() {
