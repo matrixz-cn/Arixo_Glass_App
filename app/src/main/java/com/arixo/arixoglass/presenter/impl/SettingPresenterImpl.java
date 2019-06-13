@@ -1,7 +1,6 @@
 package com.arixo.arixoglass.presenter.impl;
 
 import android.hardware.usb.UsbDevice;
-import android.util.Log;
 
 import com.arixo.arixoglass.R;
 import com.arixo.arixoglass.base.BasePresenter;
@@ -15,9 +14,8 @@ import com.arixo.bluetooth.library.connection.IBluetoothServiceCommunication;
 import com.arixo.glassframework.utils.CameraUtils;
 import com.arixo.glasssdk.core.ArixoGlassSDKManager;
 import com.arixo.glasssdk.interfaces.DeviceConnectListener;
-import com.arixo.glasssdk.serviceclient.DeviceClient;
+import com.arixo.glasssdk.serviceclient.IDeviceClient;
 import com.arixo.glasssdk.serviceclient.ILCDClient;
-import com.arixo.glasssdk.serviceclient.LCDClient;
 
 /**
  * Created by lovart on 2019/1/29
@@ -90,8 +88,8 @@ public class SettingPresenterImpl extends BasePresenter<ISettingModel, ISettingV
         }
     };
 
-    private DeviceClient deviceClient;
-    private LCDClient lcdClient;
+    private IDeviceClient deviceClient;
+    private ILCDClient lcdClient;
 
     @Override
     protected void onViewDestroy() {

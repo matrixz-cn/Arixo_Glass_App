@@ -33,9 +33,9 @@ import com.arixo.glasssdk.core.ArixoGlassSDKManager;
 import com.arixo.glasssdk.interfaces.CameraClientCallback;
 import com.arixo.glasssdk.interfaces.DeviceConnectListener;
 import com.arixo.glasssdk.interfaces.ServiceInitListener;
-import com.arixo.glasssdk.serviceclient.CameraClient;
-import com.arixo.glasssdk.serviceclient.DeviceClient;
-import com.arixo.glasssdk.serviceclient.LCDClient;
+import com.arixo.glasssdk.serviceclient.ICameraClient;
+import com.arixo.glasssdk.serviceclient.IDeviceClient;
+import com.arixo.glasssdk.serviceclient.ILCDClient;
 
 /**
  * Created by lovart on 2019/1/24
@@ -45,14 +45,14 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
     private static final String TAG = MainPresenterImpl.class.getSimpleName();
     private static final int BURST_SHOT = 0;
 
-    private CameraClient mCameraClient;
+    private ICameraClient mCameraClient;
     private long startTime;
     private boolean burstShot;
     private long keyDownTime;
     private boolean offActivity;
     private AudioManager mAudioManager;
     private MediaSession mMediaSession;
-    private LCDClient mLcdClient;
+    private ILCDClient mLcdClient;
 
     @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler() {
@@ -128,7 +128,7 @@ public class MainPresenterImpl extends BasePresenter<IMainModel, IMainView> impl
             Log.d(TAG, "onInitStatus: " + status);
             try {
                 if (status) {
-                    DeviceClient mDeviceClient = ArixoGlassSDKManager.getInstance().getDeviceClient();
+                    IDeviceClient mDeviceClient = ArixoGlassSDKManager.getInstance().getDeviceClient();
                     if (mDeviceClient != null) {
                         mDeviceClient.registerDeviceListener(mDeviceConnectListener);
                     }

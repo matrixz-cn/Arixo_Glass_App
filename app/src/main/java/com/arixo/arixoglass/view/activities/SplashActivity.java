@@ -22,7 +22,7 @@ import com.arixo.arixoglass.view.ISplashView;
 import com.arixo.glasssdk.core.ArixoGlassSDKManager;
 import com.arixo.glasssdk.interfaces.DeviceConnectListener;
 import com.arixo.glasssdk.interfaces.ServiceInitListener;
-import com.arixo.glasssdk.serviceclient.DeviceClient;
+import com.arixo.glasssdk.serviceclient.IDeviceClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +96,7 @@ public class SplashActivity extends BaseActivity<ISplashModel, ISplashView, Spla
     private final Handler handler = new Handler();
 
     private boolean mCancelled = false;
-    private DeviceClient mDeviceClient;
+    private IDeviceClient mDeviceClient;
 
     private void requestPermission() {
         for (String one : mPermission) {

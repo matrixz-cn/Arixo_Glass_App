@@ -52,5 +52,5 @@ dependencies {
     implementation "com.android.support:recyclerview-v7:${supportLibVersion}"
     implementation "com.android.support:design:${supportLibVersion}"
     implementation 'com.github.bumptech.glide:glide:4.8.0'
-    implementation 'com.arixo:glasssdk:1.0.1'
+    implementation 'com.arixo:glasssdk:1.0.3'
 }
